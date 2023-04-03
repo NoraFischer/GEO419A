@@ -22,17 +22,17 @@ def main():
 	#   einzugeben. >
 	zip_filename = "GEO419A_Testdatensatz.zip"
 	# check if zipfile exists
-	if os.path.exists(zip_filename):
-		print("Zip File wird entpackt.")
-		unpack.unpack(path, zip_filename)
-		print("Fertig entpackt.")
+	if not os.path.exists(zip_filename):
+		print("Datei wird herunter geladen")
+		# < Datei downloaden >
+		print("Download beendet.")
+
+	# unpack zip file
+	print("Zip File wird entpackt.")
+	unpack.unpack(path, zip_filename)
+	print("Fertig entpackt.")
 
 
-
-
-# zip exists?
-
-# download zip
 
 # GeoTiff exists?
 
