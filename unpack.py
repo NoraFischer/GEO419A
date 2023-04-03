@@ -1,8 +1,6 @@
 import zipfile
 import os
 
-# nex try
-
 def unpack(path, filename):
 	''' Unpack a zip file.
 
