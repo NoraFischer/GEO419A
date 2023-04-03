@@ -4,7 +4,7 @@ import unpack
 def main():
 
 	# < ist es sinnvoll den Code in der Main Datei so umfangreich zu schreiben oder wollen wir
-	#   lieber mehrere Unterfunktionen schreiben, die dann der reihe nach aufgerufen werden? >
+	#   lieber mehrere Unterfunktionen schreiben, die dann der Reihe nach aufgerufen werden? >
 
 	# Nutzerverzeichnis einlesen
 	directory_exists = False
@@ -27,16 +27,16 @@ def main():
 		# < Datei downloaden >
 		print("Download beendet.")
 
-	# unpack zip file
-	print("Zip File wird entpackt.")
-	unpack.unpack(path, zip_filename)
-	print("Fertig entpackt.")
+	# < Hier könnte man noch überlegen, wie damit umgegangen wird, wenn der Dateiname nicht bekannt ist. >
+	geotiff = "S1A_IW_20230214T031857_DVP_RTC10_G_gpunem_A42B_VH.tif"
+	# check if GeoTiff exists
+	if not os.path.exists(geotiff):
+		# unpack zip file
+		print("Zip File wird entpackt.")
+		unpack.unpack(path, zip_filename)
+		print("Fertig entpackt.")
 
 
-
-# GeoTiff exists?
-
-# unpack zip
 
 # result exists?
 
