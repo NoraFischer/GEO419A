@@ -1,5 +1,6 @@
 import os.path
 import unpack
+from osgeo import gdal
 
 def main():
 
@@ -40,7 +41,13 @@ def main():
 
 # result exists?
 
-# load data, compute and write result
+	# load data, compute and write result
+	img = gdal.Open(geotiff)
+	print(geotiff)
+	# number of bands
+	print(f"Bänder: {img.RasterCount}")
+	# image resulution
+	print(f"Auflösung: X - {img.RasterXSize}, Y - {img.RasterYSize}")
 
 # read result
 
