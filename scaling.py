@@ -34,9 +34,7 @@ def scale_geotiff():
 	# set extension of output raster
 	ds_db.SetGeoTransform(ds_lin.GetGeoTransform())
 	# set spatial reference system of output raster
-	srs = osr.SpatialReference()
-	srs.ImportFromWkt(ds_lin.GetProjection())
-	ds_db.SetProjection(srs.ExportToWkt())
+	ds_db.SetProjection(ds_lin.GetProjection())
 
 	# Write new backscatter values to rasterband
 	band_db = ds_db.GetRasterBand(1)
