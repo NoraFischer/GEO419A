@@ -196,7 +196,15 @@ def scale_geotiff(filename):
 
 	print(f"Ergebnis wurde im Verzeichnis {os.getcwd()} unter {filename_result} gespeichert.")
 
-def run():
+def visualise():
+	# Für die Darstellung des Ergebnisses können verschiedene Pakete und Funktionen verwendet werden.
+	# Wichtig ist eine Beschriftung der Achsen mit Koordinaten, eine Legende zur Darstellung des Wertebereichs,
+	# sowie eine sinnvolle Farbkodierung der Bereiche ohne Werte („no data“). Gegebenenfalls ist eine weitere
+	# Skalierung der Werte sinnvoll, um den Kontrast zu erhöhen.
+	pass
+
+
+def run(wd=None):
 	'''
 	< Was macht die Funktion?>
 	'''
@@ -206,7 +214,10 @@ def run():
 	geotiff = "S1A_IW_20230214T031857_DVP_RTC10_G_gpunem_A42B_VH.tif"
 
 	# set user directory
-	set_user_dir()
+	if wd is None:
+		set_user_dir()
+	else:
+		os.chdir(wd)
 	check_zip_filename(zip_filename)
 
 	# zip exists? Otherwise Download
@@ -225,6 +236,13 @@ def run():
 	# scaling geotiff from linear to logarithmical
 	scale_geotiff(geotiff)
 
+	# <visualise()>
+
+	print("Programm wurde beendet.")
+
 
 if __name__ == "__main__":
-	run()
+	if len(sys.argv) > 1:
+		run(sys.argv[1]) # TO DO: Überprüfen, ob der Code funktioniert, wenn man eine wd beim Aufruf eingibt
+	else:
+		run()
