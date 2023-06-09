@@ -1,19 +1,26 @@
 import os.path
 import numpy as np
-from osgeo import gdal, osr
+from osgeo import gdal
+import rasterio
+
 
 def scale_geotiff():
 
 	path = r"C:\Users\Nora\Desktop\Dokumente\Uni\Geoinformatik\2_SoSe_2023\GEO419A_Python_FE\Test"
-	#filename = r"S1A_IW_20230214T031857_DVP_RTC10_G_gpunem_A42B_VH.tif"
+	#filename = "S1A_IW_20230214T031857_DVP_RTC10_G_gpunem_A42B_VH_clipped.tif"
+	filename = r"S1A_IW_20230214T031857_DVP_RTC10_G_gpunem_A42B_VH.tif"
 	# < Mit dieser Datei funktioniert die Umwandlung in einen Array >
-	filename = r"test.tif"
+	#filename = r"test.tif"
 
 	# set working directory
 	os.chdir(path)
 	# open geotiff raster file
-	ds_lin = gdal.Open(filename)
 
+	#ds_lin = gdal.Open(filename)
+	arr_lin = rasterio.open(filename).read(1)
+	print(arr_lin)
+
+	'''
 	# convert to numpy array
 	# < funktioniert irgendwie nicht, liegt es vielleicht an der Datei? Mit einer anderen tiff Datei funktioniert es. >
 	arr_lin = ds_lin.GetRasterBand(1).ReadAsArray()
@@ -45,6 +52,8 @@ def scale_geotiff():
 	# close output dataset
 	band_db = None
 	ds_db = None
+	
+	'''
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':  scale_geotiff()
