@@ -2,9 +2,16 @@ import os
 import sys
 import zipfile
 import requests
+from osgeo import gdal
+import numpy as np
 
-def set_user_dir(current_dir):
-	"""Nutzerverzeichnis festlegen"""
+def set_user_dir():
+	'''
+	Defines the working directory.
+	'''
+
+	current_dir = os.getcwd()
+
 	# current working directory should be set as the user directory ?
 	while True:
 		q_dir = str(input(f"Möchtest Du in diesem Ordner arbeiten: {current_dir}? Tippe j (ja) oder n (nein) "
@@ -28,7 +35,16 @@ def set_user_dir(current_dir):
 	os.chdir(path)
 	print(f"Nutzerverzeichnis festgelegt: {path}")
 
-def set_zip_filename(zip_filename):
+def check_zip_filename(zip_filename):
+	'''
+	Checks if the name of a zip file is the zip file the user wants to work with.
+
+        Parameters:
+	    	zip_filename (str): name of a zip file
+
+		Returns:
+	        zip_filename (str): zip file the user wants to work with
+	'''
 	while True:
 		q_zip = str(input(f"Geht es um diese Datei: {zip_filename}? Tippe j (ja) oder n (nein) um die Datei "
 						  f"zu ändern: "))
@@ -39,9 +55,20 @@ def set_zip_filename(zip_filename):
 			break
 		else:
 			print("Ungültige Eingabe. Bitte 'j' oder 'n' eingeben.")
+
 	return zip_filename
 
 def file_exists(filename, subfolder=None):
+	'''
+	Checks if a given file is located in the working directory or in a given subfolder of the working directory.
+
+	    Parameters:
+		    filename (str): file whose existence is to be checked
+		    subfolder (str), optional: subfolder in which the file may be located
+
+		Returns:
+		    exists (bool): boolean expression if file exists
+	'''
 
 	if os.path.exists(filename) or os.path.exists(os.path.join(".", subfolder, filename)):
 		print(f"Datei {filename} existiert in dem aktuellen Arbeitsverzeichnis.")
@@ -53,7 +80,14 @@ def file_exists(filename, subfolder=None):
 	return exists
 
 def download(zip_filename, url):
+	'''
+	< Was macht die Funktion?>
 
+		Parameters:
+			zip_filename (<data type>): <Beschreibung>
+			url (<data type>): <Beschreibung>
+
+	'''
 	while True:
 		q_down = str(input(f"Soll die Datei {zip_filename} herunterladen werden? Tippe j oder n ein: "))
 		if q_down.lower() == "j":
@@ -92,6 +126,14 @@ def download(zip_filename, url):
 		print(f"Fehler aufgetreten: {e}")
 
 def unpack(filename, folder_name):
+	'''
+	< Was macht die Funktion?>
+
+		Parameters:
+			filename (<data type>): <Beschreibung>
+			folder_name (<data type>): <Beschreibung>
+
+	'''
 
 	if not os.path.exists(folder_name):
 		os.mkdir(folder_name)  # gleichnamigen Ordner anlegen
@@ -105,16 +147,67 @@ def unpack(filename, folder_name):
 
 	print("\nFertig entpackt.")
 
-def run():
+def scale_geotiff(filename):
+	'''
+	< Was macht die Funktion?>
 
-	current_dir = os.getcwd()
+		Parameters:
+			filename (<data type>): <Beschreibung>
+	'''
+
+	# open geotiff raster file
+	ds_lin = gdal.Open(filename)
+	# convert to numpy array
+	arr_lin = ds_lin.GetRasterBand(1).ReadAsArray()
+
+	# logarithmic scaling of the backscatter intensity
+	arr_db = 10 * np.log10(arr_lin, where=arr_lin > 0)
+	print(f"{filename} wurde logarithmisch skaliert")
+
+	# set filename
+	extension = ".tif"
+	while True:
+		q_filename = str(input(f"Gib einen Dateinamen ein: "))
+		if not os.path.exists(q_filename + extension):
+			filename_result = q_filename + extension
+			break
+		else: print("Die Datei existiert bereits.")
+
+	# Create new Dataset
+	driver = gdal.GetDriverByName("GTiff")
+	driver.Register()
+	ds_db = driver.Create(filename_result, xsize=arr_db.shape[1], ysize=arr_db.shape[0],
+						  bands=1, eType=gdal.GDT_Float32)
+
+	# set extension of output raster
+	ds_db.SetGeoTransform(ds_lin.GetGeoTransform())
+	# set spatial reference system of output raster
+	ds_db.SetProjection(ds_lin.GetProjection())
+
+	# Write new backscatter values to rasterband
+	band_db = ds_db.GetRasterBand(1)
+	band_db.WriteArray(arr_db)
+	band_db.SetNoDataValue(np.nan)
+	band_db.FlushCache()
+
+	# close output dataset
+	band_db = None
+	ds_db = None
+
+	print(f"Ergebnis wurde im Verzeichnis {os.getcwd()} unter {filename_result} gespeichert.")
+
+def run():
+	'''
+	< Was macht die Funktion?>
+	'''
+
 	zip_filename = "GEO419A_Testdatensatz.zip"
 	url = "https://upload.uni-jena.de/data/641c17ff33dd02.60763151/GEO419A_Testdatensatz.zip"
 	geotiff = "S1A_IW_20230214T031857_DVP_RTC10_G_gpunem_A42B_VH.tif"
 
 	# set user directory
-	set_user_dir(current_dir)
-	set_zip_filename(zip_filename)
+	set_user_dir()
+	check_zip_filename(zip_filename)
 
 	# zip exists? Otherwise Download
 	if not file_exists(zip_filename):
@@ -124,8 +217,14 @@ def run():
 	zip_folder = os.path.splitext(zip_filename)[0]  # Dateinamen ohne Erweiterung extrahieren
 	if not file_exists(geotiff, subfolder=zip_folder):
 		unpack(zip_filename, zip_folder)
+		os.chdir(zip_folder)
 		file_exists(geotiff, subfolder=zip_folder)
+
+	os.chdir(zip_folder)
+	print(os.getcwd())
+	# scaling geotiff from linear to logarithmical
+	scale_geotiff(geotiff)
 
 
 if __name__ == "__main__":
-    run()
+	run()
