@@ -14,8 +14,7 @@ def set_user_dir():
 
 	# current working directory should be set as the user directory ?
 	while True:
-		q_dir = str(input(f"Möchtest Du in diesem Ordner arbeiten: {current_dir}? Tippe j (ja) oder n (nein) "
-						  f"um den Pfad zu ändern: "))
+		q_dir = str(input(f"Möchtest Du in diesem Ordner arbeiten: {current_dir}? Tippe j (ja) oder n (nein) "))
 		if q_dir.lower() == "j":
 			path = current_dir
 			break
@@ -46,8 +45,7 @@ def check_zip_filename(zip_filename):
 	        zip_filename (str): zip file the user wants to work with
 	'''
 	while True:
-		q_zip = str(input(f"Geht es um diese Datei: {zip_filename}? Tippe j (ja) oder n (nein) um die Datei "
-						  f"zu ändern: "))
+		q_zip = str(input(f"Geht es um diese Datei: {zip_filename}? Tippe j (ja) oder n (nein) "))
 		if q_zip.lower() == "j":
 			break
 		if q_zip.lower() == "n":
@@ -161,15 +159,16 @@ def scale_geotiff(filename):
 	arr_lin = ds_lin.GetRasterBand(1).ReadAsArray()
 
 	# logarithmic scaling of the backscatter intensity
+	print(f"{filename} wird logarithmisch skaliert...")
 	arr_db = 10 * np.log10(arr_lin, where=arr_lin > 0)
-	print(f"{filename} wurde logarithmisch skaliert")
+	print(f"Skalierung beendet")
 
 	# set filename
 	extension = ".tif"
 	while True:
 		q_filename = str(input(f"Gib einen Dateinamen ein: "))
-		if not os.path.exists(q_filename + extension):
-			filename_result = q_filename + extension
+		filename_result = q_filename + extension
+		if not os.path.exists(filename_result):
 			break
 		else: print("Die Datei existiert bereits.")
 
@@ -207,6 +206,9 @@ def visualise():
 def run(wd=None):
 	'''
 	< Was macht die Funktion?>
+
+	Parameters:
+			wd (str): <Beschreibung>
 	'''
 
 	zip_filename = "GEO419A_Testdatensatz.zip"
