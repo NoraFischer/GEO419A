@@ -42,6 +42,8 @@ If you don't define a user directory the programm will give you the opportunity 
 python <dateiname.py>
 ```
 
+If you execute the file directly the program will define a zip file which contains a processed scene of the Copernicus SAR satellite Sentinel-1A with linear scaled backscatter intensity. If the zip file does not exist in your working directory it will be downloaded from a given url link. After unzipping the file the program will scale the backscatter intensity of the contained geotiff into logarithmic backscatter values. At the end the result is displayed on the screen.
+
 ## Credits
 
 This project was developed by Nora Fischer and Sheila Tholen.
