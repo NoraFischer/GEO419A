@@ -26,15 +26,21 @@ conda env create -f GEO419Aenv.yml
 
 If you want to use the functions individually in your own code you can import them.
 
-``from <Dateiname> import <name of the function you want to use>``.
+```
+from <Dateiname> import <name of the function you want to use>
+```
 
 You can also execute the file directly by calling the file and defining a working directory.
 
-``python <dateiname.py> <your/file/.../path>``.
+```
+python <dateiname.py> <your/file/.../path>
+```
 
 If you don't define a user directory the programm will give you the opportunity to define a working directory after you started the program.
 
-``python <dateiname.py>``
+```
+python <dateiname.py>
+```
 
 ## Credits
 
