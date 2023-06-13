@@ -7,7 +7,7 @@ Course: GEO 419A - Modulare Programmierung in der Fernerkundung
 
 ## Description
 
-This program was developed as a final project of a university course on modular programming in remote sensing. The aim is to implement functions that
+This program was developed as a final project of a university course on modular programming in remote sensing. The aim is to implement functions that:
 1) download and unpack a zip file 
 2) scale a geotiff image from linear to logarithmic values
 3) visualise a geotiff file
