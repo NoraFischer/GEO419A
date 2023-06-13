@@ -20,8 +20,9 @@ Provide a short description explaining the what, why, and how of your project. U
 
 In addition to the code we provide a yml-file that can be used to create a conda environment. In order to do this ypu have to run the following code in your terminal or an Anaconda Prompt.
 
-conda env create -f GEO419Aenv.yml
-conda activate GEO419A
+    ```
+    conda env create -f GEO419Aenv.yml
+    ```
 
 To install What are the steps required to install your project? Provide a step-by-step description of how to get the development environment running.
 
