@@ -56,7 +56,7 @@ def check_zip_filename(zip_filename):
 
 	return zip_filename
 
-def file_exists(filename, subfolder=None):
+def file_exists(filename, subfolder=""):
 	'''
 	Checks if a given file is located in the working directory or in a given subfolder of the working directory.
 
