@@ -116,7 +116,7 @@ class DownloadReadShow():
                 self.geotiff = q_file  # neuer geotiff Name
 
         folder_name = os.path.splitext(self.zip_file)[0]  # Dateinamen ohne Erweiterung extrahieren
-        if os.path.exists(self.geotiff) or os.path.exists(os.path.join(".", folder_name, self.geotiff)):
+        if os.path.exists(self.geotiff) or os.path.exists(os.path.join("..", folder_name, self.geotiff)):
             print(f"Datei {self.geotiff} existiert in dem aktuellen Arbeitsverzeichnis.")
         else:
             if not os.path.exists(folder_name):
