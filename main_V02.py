@@ -4,26 +4,32 @@ import zipfile
 import requests
 from osgeo import gdal
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+from matplotlib_scalebar.scalebar import ScaleBar
 
-def set_user_dir():
+def set_user_dir(wd):
 	'''
 	Defines the working directory.
+
+        Parameters:
+	    	wd (str): working directory
 	'''
 
-	current_dir = os.getcwd()
+	if wd == None:
+		# if no wd, sets current working directory
+		wd = os.getcwd()
 
-	# current working directory should be set as the user directory ?
 	while True:
-		q_dir = str(input(f"Möchtest Du in diesem Ordner arbeiten: {current_dir}? Tippe j (ja) oder n (nein) "))
+		q_dir = str(input(f"Möchtest Du in diesem Ordner arbeiten? \n {wd} \n Ja (Pfad behalten) \n Nein (Pfad ändern) \n [j/n]: "))
 		if q_dir.lower() == "j":
-			path = current_dir
 			break
 		elif q_dir.lower() == "n":
 			directory_exists = False
 			while directory_exists is False:
-				path = str(input("Gib den Pfad zu dem Ordner ein, in dem Du arbeiten möchtest: "))
-				if not os.path.isdir(path):
-					print("Dieses Verzeichnis existiert nicht. Gib erneut einen Ordnerpfad ein.")
+				wd = str(input("Gib den Pfad zu dem Ordner ein, in dem Du arbeiten möchtest: "))
+				if not os.path.isdir(wd):
+					print("Dieses Verzeichnis existiert nicht. Gib erneut einen Ordnerpfad ein: ")
 				else:
 					directory_exists = True
 			break
@@ -31,32 +37,32 @@ def set_user_dir():
 			print("Ungültige Eingabe. Bitte 'j' oder 'n' eingeben.")
 
 	# set working directory
-	os.chdir(path)
-	print(f"Nutzerverzeichnis festgelegt: {path}")
+	os.chdir(wd)
+	print(f"Nutzerverzeichnis festgelegt: {wd}\n\n")
 
-def check_zip_filename(zip_filename):
+def check_filename(filename):
 	'''
-	Checks if the name of a zip file is the zip file the user wants to work with.
+	Checks if the name of a file is th file the user wants to work with.
 
         Parameters:
-	    	zip_filename (str): name of a zip file
+	    	filename (str): name of a file
 
 		Returns:
-	        zip_filename (str): zip file the user wants to work with
+	        filename (str): file the user wants to work with
 	'''
 	while True:
-		q_zip = str(input(f"Geht es um diese Datei: {zip_filename}? Tippe j (ja) oder n (nein) "))
-		if q_zip.lower() == "j":
+		q_file = str(input(f"Geht es um diese Datei {filename}? \n Ja \n Nein (Datei ändern)\n[j/n] "))
+		if q_file.lower() == "j":
 			break
-		if q_zip.lower() == "n":
-			zip_filename = str(input("Gib den Dateinamen ein, um den es geht: "))
+		elif q_file.lower() == "n":
+			filename = str(input("Gib den Dateinamen ein, um den es geht: "))
 			break
 		else:
 			print("Ungültige Eingabe. Bitte 'j' oder 'n' eingeben.")
 
-	return zip_filename
+	return filename
 
-def file_exists(filename, subfolder=None):
+def file_exists(filename, subfolder=""):
 	'''
 	Checks if a given file is located in the working directory or in a given subfolder of the working directory.
 
@@ -69,25 +75,25 @@ def file_exists(filename, subfolder=None):
 	'''
 
 	if os.path.exists(filename) or os.path.exists(os.path.join(".", subfolder, filename)):
-		print(f"Datei {filename} existiert in dem aktuellen Arbeitsverzeichnis.")
+		print(f"Datei {filename} existiert in dem aktuellen Arbeitsverzeichnis.\n\n")
 		exists = True
 	else:
-		print(f"Die Datei {filename} existiert in dem aktuellen Arbeitsverzeichnis nicht.")
+		print(f"Die Datei {filename} existiert in dem aktuellen Arbeitsverzeichnis nicht.\n\n")
 		exists = False
 
 	return exists
 
 def download(zip_filename, url):
 	'''
-	< Was macht die Funktion?>
+	Download zip file from url
 
 		Parameters:
-			zip_filename (<data type>): <Beschreibung>
-			url (<data type>): <Beschreibung>
+			zip_filename (str): name of the zip file
+			url (str): link to download the given zip file
 
 	'''
 	while True:
-		q_down = str(input(f"Soll die Datei {zip_filename} herunterladen werden? Tippe j oder n ein: "))
+		q_down = str(input(f"Soll die Datei {zip_filename} herunterladen werden? \n [j/n] "))
 		if q_down.lower() == "j":
 			if zip_filename != "GEO419A_Testdatensatz.zip":
 				# falls es um eine andere Datei geht, braucht es auch einen anderen Link
@@ -114,7 +120,7 @@ def download(zip_filename, url):
 				download_size += len(data)  # Bereits heruntergeladene Daten aktualisieren
 				progress = download_size / total_size * 100  # Fortschritt in Prozent
 				print(f"\rDownload {zip_filename}: {progress:.2f}%",end="")  # Forschritt anzeigen (\r gleiche Zeile)
-		print("Download erfolgreich abgeschlossen.")
+		print("Download erfolgreich abgeschlossen.\n\n")
 
 	except requests.exceptions.HTTPError as http_err:
 		print(f"HTTP Fehler aufgetreten: {http_err}")
@@ -125,11 +131,11 @@ def download(zip_filename, url):
 
 def unpack(filename, folder_name):
 	'''
-	< Was macht die Funktion?>
+	unpacks the zip file
 
 		Parameters:
-			filename (<data type>): <Beschreibung>
-			folder_name (<data type>): <Beschreibung>
+			filename (str): zip file to be extracted
+			folder_name (str): name of the zip file without file ending
 
 	'''
 
@@ -143,14 +149,15 @@ def unpack(filename, folder_name):
 			zf.close()
 			break
 
-	print("\nFertig entpackt.")
+	print("\nFertig entpackt.\n\n")
 
-def scale_geotiff(filename):
+def scale_geotiff(filename, result):
 	'''
-	< Was macht die Funktion?>
+	Load data, compute and write result
 
 		Parameters:
-			filename (<data type>): <Beschreibung>
+			filename (str): unedited file
+			result (str): computed image (the result)
 	'''
 
 	# open geotiff raster file
@@ -161,21 +168,21 @@ def scale_geotiff(filename):
 	# logarithmic scaling of the backscatter intensity
 	print(f"{filename} wird logarithmisch skaliert...")
 	arr_db = 10 * np.log10(arr_lin, where=arr_lin > 0)
-	print(f"Skalierung beendet")
+	print(f"Skalierung beendet.\n\n")
 
 	# set filename
-	extension = ".tif"
-	while True:
-		q_filename = str(input(f"Gib einen Dateinamen ein: "))
-		filename_result = q_filename + extension
-		if not os.path.exists(filename_result):
-			break
-		else: print("Die Datei existiert bereits.")
+	#extension = ".tif"
+	#while True:
+	#	q_filename = str(input(f"Gib einen Dateinamen ein: "))
+	#	filename_result = q_filename + extension
+	#	if not os.path.exists(filename_result):
+	#		break
+	#	else: print("Die Datei existiert bereits.")
 
 	# Create new Dataset
 	driver = gdal.GetDriverByName("GTiff")
 	driver.Register()
-	ds_db = driver.Create(filename_result, xsize=arr_db.shape[1], ysize=arr_db.shape[0],
+	ds_db = driver.Create(result, xsize=arr_db.shape[1], ysize=arr_db.shape[0],
 						  bands=1, eType=gdal.GDT_Float32)
 
 	# set extension of output raster
@@ -193,15 +200,67 @@ def scale_geotiff(filename):
 	band_db = None
 	ds_db = None
 
-	print(f"Ergebnis wurde im Verzeichnis {os.getcwd()} unter {filename_result} gespeichert.")
+	print(f"Ergebnis wurde im Verzeichnis {os.getcwd()} unter {result} gespeichert.\n\n")
 
-def visualise():
-	# Für die Darstellung des Ergebnisses können verschiedene Pakete und Funktionen verwendet werden.
-	# Wichtig ist eine Beschriftung der Achsen mit Koordinaten, eine Legende zur Darstellung des Wertebereichs,
-	# sowie eine sinnvolle Farbkodierung der Bereiche ohne Werte („no data“). Gegebenenfalls ist eine weitere
-	# Skalierung der Werte sinnvoll, um den Kontrast zu erhöhen.
-	pass
+def visualize(result):
+	'''
+	Visualisation of the result
 
+		Parameters:
+			result (str): computed image (the result) to visualize
+	'''
+
+
+	print("Visualisierung lädt...")
+	# open geotiff
+	dataset = gdal.Open(result)
+	image = dataset.ReadAsArray()
+	# extract the geographical information from metadata
+	geotransform = dataset.GetGeoTransform()
+
+	image[image == 0] = np.nan # Set 0 values as NaN
+
+	fig, ax = plt.subplots() # figure and axes
+
+	# Show the image with white background
+	im = ax.imshow(image, cmap='gray', vmin=np.nanmin(image), vmax=np.nanmax(image),
+				   extent=[geotransform[0], geotransform[0] + geotransform[1] * dataset.RasterXSize, geotransform[3] +
+						   geotransform[5] * dataset.RasterYSize, geotransform[3]])
+
+	cbar = fig.colorbar(im, ax=ax, extend='neither') # legend
+	cbar.ax.tick_params(labelsize = 8) # size colorbarnumbers
+
+	# numbers of ticks (axis)
+	ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins=3))
+	ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=3))
+
+	# labels
+	fig.text(0.87, 0.50, 'Rückstreuintensität [dB]', va='center', rotation='vertical')
+	plt.subplots_adjust(top=0.85) # differnece between image and title
+	ax.set_title("Logarithmisch skalierte Szene", pad=20)
+	ax.set_xlabel("Ostwert", fontdict={'fontsize': 10})
+	ax.set_ylabel("Nordwert", fontdict={'fontsize': 10})
+	ax.tick_params(axis='both', which='major', labelsize=8) # fontsize of coordinate numbers (axis)
+
+	# scalebar
+	scalebar = ScaleBar(1, units='m', location='lower left', frameon=False, color='black', box_alpha=0.0, font_properties={'size': 8})
+	ax.add_artist(scalebar)
+
+	# coordinate system
+	srs = dataset.GetProjection()
+	if "PROJCS" in srs:
+		start_index = srs.index("PROJCS") + len("PROJCS") + 2
+		end_index = srs.index(",", start_index)
+		projcs = srs[start_index:end_index].strip()
+		projcs = projcs.replace('"', '') # without ""
+		# add coordinate system to plot
+		text_x = geotransform[0] + 0.99 * geotransform[1] * dataset.RasterXSize
+		text_y = geotransform[3] + 0.97 * geotransform[5] * dataset.RasterYSize
+		ax.annotate(f"{projcs}", xy=(text_x, text_y), xycoords='data', fontsize=6, ha='right', va='top')
+
+	# show plot
+	print("Fertig.\n\n")
+	plt.show()
 
 def run(wd=None):
 	'''
@@ -216,35 +275,39 @@ def run(wd=None):
 	geotiff = "S1A_IW_20230214T031857_DVP_RTC10_G_gpunem_A42B_VH.tif"
 
 	# set user directory
-	if wd is None:
-		set_user_dir()
-	else:
-		os.chdir(wd)
-	check_zip_filename(zip_filename)
+	set_user_dir(wd)
+	# zip_filename
+	zip_filename = check_filename(zip_filename)
 
 	# zip exists? Otherwise Download
 	if not file_exists(zip_filename):
 		download(zip_filename, url)
 
-	# file exists? Otherwise unpack zip
+	# geotiff
+	geotiff = check_filename(geotiff)
+	# file (geotiff) exists? Otherwise unpack zip
 	zip_folder = os.path.splitext(zip_filename)[0]  # Dateinamen ohne Erweiterung extrahieren
 	if not file_exists(geotiff, subfolder=zip_folder):
 		unpack(zip_filename, zip_folder)
-		os.chdir(zip_folder)
-		file_exists(geotiff, subfolder=zip_folder)
 
 	os.chdir(zip_folder)
-	print(os.getcwd())
-	# scaling geotiff from linear to logarithmical
-	scale_geotiff(geotiff)
 
-	# <visualise()>
+	# result
+	result = os.path.splitext(geotiff)[0] + "_result" + os.path.splitext(geotiff)[1]
+	result = check_filename(result)
+	# result exists: read it. Otherwise load data, compute and write result
+	if not file_exists(result, subfolder=zip_folder):
+		# scaling geotiff from linear to logarithmical
+		scale_geotiff(geotiff, result)
+
+	# display result
+	visualize(result)
 
 	print("Programm wurde beendet.")
 
 
 if __name__ == "__main__":
 	if len(sys.argv) > 1:
-		run(sys.argv[1]) # TO DO: Überprüfen, ob der Code funktioniert, wenn man eine wd beim Aufruf eingibt
+		run(sys.argv[1])
 	else:
 		run()
