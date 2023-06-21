@@ -13,28 +13,40 @@ def set_user_dir(wd):
 	Defines the working directory.
 
         Parameters:
-	    	wd (str): working directory
+	    	wd (str): folder path
 	'''
 
 	if wd == None:
 		# if no wd, sets current working directory
 		wd = os.getcwd()
-
-	while True:
-		q_dir = str(input(f"Möchtest Du in diesem Ordner arbeiten? \n {wd} \n Ja (Pfad behalten) \n Nein (Pfad ändern) \n [j/n]: "))
-		if q_dir.lower() == "j":
-			break
-		elif q_dir.lower() == "n":
-			directory_exists = False
-			while directory_exists is False:
+		# check if user wants to use the current working directory
+		while True:
+			q_dir = str(input(f"Möchtest Du in diesem Ordner arbeiten? \n "
+							  f"{wd} \n "
+							  f"Ja (Pfad behalten) \n "
+							  f"Nein (Pfad ändern) \n "
+							  f"[j/n]: "))
+			if q_dir.lower() == "j":
+				break
+			elif q_dir.lower() == "n":
+				directory_exists = False
+				while directory_exists is False:
+					wd = str(input("Gib den Pfad zu dem Ordner ein, in dem Du arbeiten möchtest: "))
+					if not os.path.isdir(wd):
+						print("Dieses Verzeichnis existiert nicht. Gib erneut einen Ordnerpfad ein: ")
+					else:
+						directory_exists = True
+				break
+			else:
+				print("Ungültige Eingabe. Bitte 'j' oder 'n' eingeben.")
+	# check if folder path exists
+	else:
+		while True:
+			if not os.path.isdir(wd):
+				print(f"Das eingegebene Verzeichnis existiert nicht. Gib einen anderen Ordnerpfad ein: ")
 				wd = str(input("Gib den Pfad zu dem Ordner ein, in dem Du arbeiten möchtest: "))
-				if not os.path.isdir(wd):
-					print("Dieses Verzeichnis existiert nicht. Gib erneut einen Ordnerpfad ein: ")
-				else:
-					directory_exists = True
-			break
-		else:
-			print("Ungültige Eingabe. Bitte 'j' oder 'n' eingeben.")
+			else:
+				break
 
 	# set working directory
 	os.chdir(wd)
@@ -48,14 +60,17 @@ def check_filename(filename):
 	    	filename (str): name of a file
 
 		Returns:
-	        filename (str): file the user wants to work with
+	        filename (str): name of the file the user wants to work with
 	'''
 	while True:
-		q_file = str(input(f"Geht es um diese Datei {filename}? \n Ja \n Nein (Datei ändern)\n[j/n] "))
+		q_file = str(input(f"Geht es um diese Datei {filename}? \n "
+						   f"Ja \n "
+						   f"Nein (Datei ändern)\n"
+						   f"[j/n] "))
 		if q_file.lower() == "j":
 			break
 		elif q_file.lower() == "n":
-			filename = str(input("Gib den Dateinamen ein, um den es geht: "))
+			filename = str(input("Gib den Dateinamen (inkl. Dateinamenerweiterung) ein, um den es geht: "))
 			break
 		else:
 			print("Ungültige Eingabe. Bitte 'j' oder 'n' eingeben.")
@@ -153,10 +168,10 @@ def unpack(filename, folder_name):
 
 def scale_geotiff(filename, filename_result):
 	'''
-	Load data, compute and write result
+	compute pixel values from first Band of a GeoTIFF file logarithmically
 
 		Parameters:
-			filename (str): unedited file
+			filename (str): unedited file (linear scaling)
 			filename_result (str): name for the new GeoTIFF file
 	'''
 
@@ -171,6 +186,7 @@ def scale_geotiff(filename, filename_result):
 	print(f"Skalierung beendet.\n\n")
 
 	# Create new Dataset
+	print(f"Neue GeoTIFF Datei {filename_result} wird erstellt...")
 	driver = gdal.GetDriverByName("GTiff")
 	driver.Register()
 	ds_db = driver.Create(filename_result, xsize=arr_db.shape[1], ysize=arr_db.shape[0],
@@ -266,32 +282,33 @@ def run(wd=None):
 
 	# set user directory
 	set_user_dir(wd)
-	# zip_filename
-	zip_filename = check_filename(zip_filename)
 
+	# check name of zip file
+	zip_filename = check_filename(zip_filename)
 	# zip exists? Otherwise Download
 	if not file_exists(zip_filename):
 		download(zip_filename, url)
 
-	# geotiff
+	# check name of GeoTIFF file
 	geotiff = check_filename(geotiff)
 	# file (geotiff) exists? Otherwise unpack zip
-	zip_folder = os.path.splitext(zip_filename)[0]  # Dateinamen ohne Erweiterung extrahieren
+	zip_folder = os.path.splitext(zip_filename)[0]  # extract filename without extension
 	if not file_exists(geotiff, subfolder=zip_folder):
 		unpack(zip_filename, zip_folder)
 
 	os.chdir(zip_folder)
 
-	# result
+	# set filename for result
 	result = os.path.splitext(geotiff)[0] + "_result" + os.path.splitext(geotiff)[1]
+	# check name of result file
 	result = check_filename(result)
-	# result exists: read it. Otherwise load data, compute and write result
-	if not file_exists(result, subfolder=zip_folder):
+	# result exists? Otherwise process GeoTIFF file
+	if not file_exists(result):
 		# scaling geotiff from linear to logarithmical
 		scale_geotiff(geotiff, result)
 
 	# display result
-	visualize(result)
+	#visualize(result)
 
 	print("Programm wurde beendet.")
 
