@@ -96,7 +96,7 @@ def download(zip_filename, url):
 		q_down = str(input(f"Soll die Datei {zip_filename} herunterladen werden? \n [j/n] "))
 		if q_down.lower() == "j":
 			if zip_filename != "GEO419A_Testdatensatz.zip":
-				# falls es um eine andere Datei geht, braucht es auch einen anderen Link
+				# if it's about a different file, it needs a different link as well
 				url = str(input(f"Bitte Downloadlink eingeben: "))
 			break
 		elif q_down.lower() == "n":
@@ -104,22 +104,22 @@ def download(zip_filename, url):
 		else:
 			print("Ungültige Eingabe. Bitte 'j' oder 'n' eingeben")
 	try:
-		response = requests.get(url, stream=True)  # stream=True Daten in Blöcken herunterladen
-		response.raise_for_status()  # HTTP-Fehlermeldung, wenn Anfrage fehlschlägt
+		response = requests.get(url, stream=True)  # stream=True Download data in blocks
+		response.raise_for_status()  # HTTP error message when request fails
 
-		# Für den Fortschritt:
-		total_size = int(response.headers.get("content-length", 0))  # Größe der herunterzuladenen Datei ermitteln, sonst 0
-		block_size = 1024  # Blockgröße in der Datei heruntladen
-		download_size = 0  # Variable zum Speichern der bereits heruntergeladenen Daten
+		# show progress:
+		total_size = int(response.headers.get("content-length", 0))  # Determine the size of the file to be downloaded, otherwise 0
+		block_size = 1024  # blocksize
+		download_size = 0  # Variable to store the already downloaded data
 
-		# Datei zum Schreiben der heruntergeladenen Datei im Binärmodus (wb)
+		# File to write the downloaded file in binary mode (wb)
 		with open(os.path.join(os.getcwd(), zip_filename), "wb") as file:
-			# Über Daten iterieren, um Fortschritt anzeigen zu können
+			# Iterate over data to show progress
 			for data in response.iter_content(block_size):
-				file.write(data)  # Daten schreiben
-				download_size += len(data)  # Bereits heruntergeladene Daten aktualisieren
-				progress = download_size / total_size * 100  # Fortschritt in Prozent
-				print(f"\rDownload {zip_filename}: {progress:.2f}%",end="")  # Forschritt anzeigen (\r gleiche Zeile)
+				file.write(data)  # write data
+				download_size += len(data)  # Update already downloaded data
+				progress = download_size / total_size * 100  # Percent progress
+				print(f"\rDownload {zip_filename}: {progress:.2f}%",end="")  # Show progress (\r same line)
 		print("Download erfolgreich abgeschlossen.\n\n")
 
 	except requests.exceptions.HTTPError as http_err:
