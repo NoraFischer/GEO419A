@@ -42,7 +42,7 @@ def set_user_dir(wd):
 
 def check_filename(filename):
 	'''
-	Checks if the name of a file is th file the user wants to work with.
+	Checks if the name of a file is the file the user wants to work with.
 
         Parameters:
 	    	filename (str): name of a file
@@ -78,7 +78,7 @@ def file_exists(filename, subfolder=""):
 		print(f"Datei {filename} existiert in dem aktuellen Arbeitsverzeichnis.\n\n")
 		exists = True
 	else:
-		print(f"Die Datei {filename} existiert in dem aktuellen Arbeitsverzeichnis nicht.\n\n")
+		print(f"Die Datei {filename} existiert nicht in dem aktuellen Arbeitsverzeichnis.\n\n")
 		exists = False
 
 	return exists
@@ -151,16 +151,16 @@ def unpack(filename, folder_name):
 
 	print("\nFertig entpackt.\n\n")
 
-def scale_geotiff(filename, result):
+def scale_geotiff(filename, filename_result):
 	'''
 	Load data, compute and write result
 
 		Parameters:
 			filename (str): unedited file
-			result (str): computed image (the result)
+			filename_result (str): name for the new GeoTIFF file
 	'''
 
-	# open geotiff raster file
+	# open GeoTIFF raster file
 	ds_lin = gdal.Open(filename)
 	# convert to numpy array
 	arr_lin = ds_lin.GetRasterBand(1).ReadAsArray()
@@ -170,19 +170,10 @@ def scale_geotiff(filename, result):
 	arr_db = 10 * np.log10(arr_lin, where=arr_lin > 0)
 	print(f"Skalierung beendet.\n\n")
 
-	# set filename
-	#extension = ".tif"
-	#while True:
-	#	q_filename = str(input(f"Gib einen Dateinamen ein: "))
-	#	filename_result = q_filename + extension
-	#	if not os.path.exists(filename_result):
-	#		break
-	#	else: print("Die Datei existiert bereits.")
-
 	# Create new Dataset
 	driver = gdal.GetDriverByName("GTiff")
 	driver.Register()
-	ds_db = driver.Create(result, xsize=arr_db.shape[1], ysize=arr_db.shape[0],
+	ds_db = driver.Create(filename_result, xsize=arr_db.shape[1], ysize=arr_db.shape[0],
 						  bands=1, eType=gdal.GDT_Float32)
 
 	# set extension of output raster
@@ -200,20 +191,19 @@ def scale_geotiff(filename, result):
 	band_db = None
 	ds_db = None
 
-	print(f"Ergebnis wurde im Verzeichnis {os.getcwd()} unter {result} gespeichert.\n\n")
+	print(f"Ergebnis wurde im Verzeichnis {os.getcwd()} unter {filename_result} gespeichert.\n\n")
 
-def visualize(result):
+def visualize(geotiff):
 	'''
-	Visualisation of the result
+	Visualisation of GeoTIFF file
 
 		Parameters:
-			result (str): computed image (the result) to visualize
+			geotiff (str): geotiff to visualize
 	'''
-
 
 	print("Visualisierung lädt...")
 	# open geotiff
-	dataset = gdal.Open(result)
+	dataset = gdal.Open(geotiff)
 	image = dataset.ReadAsArray()
 	# extract the geographical information from metadata
 	geotransform = dataset.GetGeoTransform()
