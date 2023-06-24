@@ -211,14 +211,14 @@ def scale_geotiff(filename, filename_result):
 
 	print(f"Ergebnis wurde im Verzeichnis {os.getcwd()} unter {filename_result} gespeichert.\n\n")
 
-def visualize_geotiff(geotiff, titel, unit):
+def visualize_geotiff(geotiff, title, unit):
 	'''
 	Visualisation of GeoTIFF file
 
 		Parameters:
 			geotiff (str): name of geotiff to visualize
 			title (str): title for plot
-			label (str): unit of pixel
+			unit (str): unit of pixel
 	'''
 
 	print("Visualisierung lädt...")
@@ -247,7 +247,7 @@ def visualize_geotiff(geotiff, titel, unit):
 	# labels
 	fig.text(0.87, 0.50, unit, va='center', rotation='vertical')
 	plt.subplots_adjust(top=0.85) # differnece between image and title
-	ax.set_title(titel, pad=20)
+	ax.set_title(title, pad=20)
 	ax.set_xlabel("Ostwert", fontdict={'fontsize': 10})
 	ax.set_ylabel("Nordwert", fontdict={'fontsize': 10})
 	ax.tick_params(axis='both', which='major', labelsize=8) # fontsize of coordinate numbers (axis)
@@ -311,14 +311,14 @@ def run(wd=None):
 	# check name of result file
 	print("Name für Ergebnis:")
 	while True:
-		q_file = str(input(f"Möchtest einen Namen für das Ergebnis eingeben? \n"
+		q_name = str(input(f"Möchtest einen Namen für das Ergebnis eingeben? \n"
 						   f" Ja \n"
 						   f" Nein (Default Einstellung ({result}) übernehmen)\n"
 						   f" [j/n]"))
-		if q_file.lower() == "j":
+		if q_name.lower() == "j":
 			result = str(input("Gib den Dateinamen (inkl. Dateinamenerweiterung) ein: "))
 			break
-		elif q_file.lower() == "n":
+		elif q_name.lower() == "n":
 			break
 		else:
 			print("Ungültige Eingabe. Bitte 'j' oder 'n' eingeben.")
