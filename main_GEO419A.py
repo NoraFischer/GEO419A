@@ -1,12 +1,14 @@
 import os
 import sys
 import zipfile
-import requests
-from osgeo import gdal
-import numpy as np
+
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+import numpy as np
+import requests
+
 from matplotlib_scalebar.scalebar import ScaleBar
+from osgeo import gdal
 
 def set_user_dir(wd):
 	'''
@@ -21,11 +23,11 @@ def set_user_dir(wd):
 		wd = os.getcwd()
 		# check if user wants to use the current working directory
 		while True:
-			q_dir = str(input(f"Möchtest Du in diesem Ordner arbeiten? \n "
-							  f"{wd} \n "
-							  f"Ja (Pfad behalten) \n "
-							  f"Nein (Pfad ändern) \n "
-							  f"[j/n]: "))
+			q_dir = str(input(f"Möchtest Du in diesem Ordner arbeiten? \n"
+							  f" {wd} \n"
+							  f" Ja (Pfad behalten) \n"
+							  f" Nein (Pfad ändern) \n"
+							  f" [j/n]: "))
 			if q_dir.lower() == "j":
 				break
 			elif q_dir.lower() == "n":
@@ -63,10 +65,10 @@ def check_filename(filename):
 	        filename (str): name of the file the user wants to work with
 	'''
 	while True:
-		q_file = str(input(f"Geht es um diese Datei {filename}? \n "
-						   f"Ja \n "
-						   f"Nein (Datei ändern)\n"
-						   f"[j/n] "))
+		q_file = str(input(f"Geht es um diese Datei {filename}? \n"
+						   f" Ja \n"
+						   f" Nein (Datei ändern)\n"
+						   f" [j/n] "))
 		if q_file.lower() == "j":
 			break
 		elif q_file.lower() == "n":
@@ -209,12 +211,14 @@ def scale_geotiff(filename, filename_result):
 
 	print(f"Ergebnis wurde im Verzeichnis {os.getcwd()} unter {filename_result} gespeichert.\n\n")
 
-def visualize(geotiff):
+def visualize_geotiff(geotiff, titel, unit):
 	'''
 	Visualisation of GeoTIFF file
 
 		Parameters:
-			geotiff (str): geotiff to visualize
+			geotiff (str): name of geotiff to visualize
+			title (str): title for plot
+			label (str): unit of pixel
 	'''
 
 	print("Visualisierung lädt...")
@@ -241,15 +245,16 @@ def visualize(geotiff):
 	ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=3))
 
 	# labels
-	fig.text(0.87, 0.50, 'Rückstreuintensität [dB]', va='center', rotation='vertical')
+	fig.text(0.87, 0.50, unit, va='center', rotation='vertical')
 	plt.subplots_adjust(top=0.85) # differnece between image and title
-	ax.set_title("Logarithmisch skalierte Szene", pad=20)
+	ax.set_title(titel, pad=20)
 	ax.set_xlabel("Ostwert", fontdict={'fontsize': 10})
 	ax.set_ylabel("Nordwert", fontdict={'fontsize': 10})
 	ax.tick_params(axis='both', which='major', labelsize=8) # fontsize of coordinate numbers (axis)
 
 	# scalebar
-	scalebar = ScaleBar(1, units='m', location='lower left', frameon=False, color='black', box_alpha=0.0, font_properties={'size': 8})
+	scalebar = ScaleBar(1, units='m', location='lower left', frameon=False, color='black', box_alpha=0.0,
+						font_properties={'size': 8})
 	ax.add_artist(scalebar)
 
 	# coordinate system
@@ -265,8 +270,8 @@ def visualize(geotiff):
 		ax.annotate(f"{projcs}", xy=(text_x, text_y), xycoords='data', fontsize=6, ha='right', va='top')
 
 	# show plot
-	print("Fertig.\n\n")
 	plt.show()
+	print("VisualisierungFertig.\n\n")
 
 def run(wd=None):
 	'''
@@ -284,12 +289,14 @@ def run(wd=None):
 	set_user_dir(wd)
 
 	# check name of zip file
+	print("Zip Datei:")
 	zip_filename = check_filename(zip_filename)
 	# zip exists? Otherwise Download
 	if not file_exists(zip_filename):
 		download(zip_filename, url)
 
 	# check name of GeoTIFF file
+	print("GeoTIFF Datei:")
 	geotiff = check_filename(geotiff)
 	# file (geotiff) exists? Otherwise unpack zip
 	zip_folder = os.path.splitext(zip_filename)[0]  # extract filename without extension
@@ -298,17 +305,30 @@ def run(wd=None):
 
 	os.chdir(zip_folder)
 
-	# set filename for result
+	# set default filename for result
 	result = os.path.splitext(geotiff)[0] + "_result" + os.path.splitext(geotiff)[1]
 	# check name of result file
-	result = check_filename(result)
+	print("Name für Ergebnis:")
+	while True:
+		q_file = str(input(f"Möchtest einen Namen für das Ergebnis eingeben? \n"
+						   f" Ja \n"
+						   f" Nein (Default Einstellung ({result}) übernehmen)\n"
+						   f" [j/n]"))
+		if q_file.lower() == "j":
+			result = str(input("Gib den Dateinamen (inkl. Dateinamenerweiterung) ein: "))
+			break
+		elif q_file.lower() == "n":
+			break
+		else:
+			print("Ungültige Eingabe. Bitte 'j' oder 'n' eingeben.")
+
 	# result exists? Otherwise process GeoTIFF file
 	if not file_exists(result):
 		# scaling geotiff from linear to logarithmical
 		scale_geotiff(geotiff, result)
 
 	# display result
-	#visualize(result)
+	visualize_geotiff(result, "Logarithmisch skalierte Szene", "Rückstreuintensität [db]")
 
 	print("Programm wurde beendet.")
 
