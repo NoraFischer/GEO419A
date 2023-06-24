@@ -275,10 +275,11 @@ def visualize_geotiff(geotiff, titel, unit):
 
 def run(wd=None):
 	'''
-	< Was macht die Funktion?>
+	Uses the functions of this module to download a zip file with a radar scene (linear scaled backscatter values)
+	in GeoTIFF file format and unpack it. The GeoTIFF will be scaled logarithmically and displayed on a map.
 
 	Parameters:
-			wd (str): <Beschreibung>
+			wd (str), optional: working directory
 	'''
 
 	zip_filename = "GEO419A_Testdatensatz.zip"
