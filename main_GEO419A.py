@@ -41,7 +41,8 @@ def set_user_dir(wd):
 				break
 			else:
 				print("Ungültige Eingabe. Bitte 'j' oder 'n' eingeben.")
-	# check if folder path exists
+
+	# wd is given: check if folder path exists
 	else:
 		while True:
 			if not os.path.isdir(wd):
@@ -64,6 +65,7 @@ def check_filename(filename):
 		Returns:
 	        filename (str): name of the file the user wants to work with
 	'''
+
 	while True:
 		q_file = str(input(f"Geht es um diese Datei {filename}? \n"
 						   f" Ja \n"
@@ -109,6 +111,7 @@ def download(zip_filename, url):
 			url (str): link to download the given zip file
 
 	'''
+
 	while True:
 		q_down = str(input(f"Soll die Datei {zip_filename} herunterladen werden? \n [j/n] "))
 		if q_down.lower() == "j":
@@ -156,9 +159,11 @@ def unpack(filename, folder_name):
 
 	'''
 
+	# create folder
 	if not os.path.exists(folder_name):
-		os.mkdir(folder_name)  # gleichnamigen Ordner anlegen
+		os.mkdir(folder_name)
 
+	# unpack zip file
 	while True:
 		print(f"\rOrdner {filename} wird entpackt ... ", end="")
 		with zipfile.ZipFile(filename) as zf:
@@ -270,8 +275,8 @@ def visualize_geotiff(geotiff, title, unit):
 		ax.annotate(f"{projcs}", xy=(text_x, text_y), xycoords='data', fontsize=6, ha='right', va='top')
 
 	# show plot
-	plt.show()
-	print("VisualisierungFertig.\n\n")
+	plt.show(block=True)
+	print("Visualisierung Fertig.\n\n")
 
 def run(wd=None):
 	'''
@@ -313,7 +318,7 @@ def run(wd=None):
 	while True:
 		q_name = str(input(f"Möchtest einen Namen für das Ergebnis eingeben? \n"
 						   f" Ja \n"
-						   f" Nein (Default Einstellung ({result}) übernehmen)\n"
+						   f" Nein (Default Einstellung ({result}) übernehmen?\n"
 						   f" [j/n]"))
 		if q_name.lower() == "j":
 			result = str(input("Gib den Dateinamen (inkl. Dateinamenerweiterung) ein: "))
