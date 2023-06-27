@@ -216,7 +216,7 @@ def scale_geotiff(filename, filename_result):
 
 	print(f"Ergebnis wurde im Verzeichnis {os.getcwd()} unter {filename_result} gespeichert.\n\n")
 
-def visualize_geotiff(geotiff, title, unit):
+def visualize_geotiff(geotiff, title, unit, color):
 	'''
 	Visualisation of GeoTIFF file
 
@@ -230,15 +230,18 @@ def visualize_geotiff(geotiff, title, unit):
 	# open geotiff
 	dataset = gdal.Open(geotiff)
 	image = dataset.ReadAsArray()
+
 	# extract the geographical information from metadata
 	geotransform = dataset.GetGeoTransform()
 
-	image[image == 0] = np.nan # Set 0 values as NaN
+	# Set 0 values as NaN
+	image[image == 0] = np.nan
 
-	fig, ax = plt.subplots() # figure and axes
+	# figure and axes
+	fig, ax = plt.subplots()
 
 	# Show the image with white background
-	im = ax.imshow(image, cmap='gray', vmin=np.nanmin(image), vmax=np.nanmax(image),
+	im = ax.imshow(image, cmap=color, vmin=np.nanpercentile(image, 2), vmax=np.nanpercentile(image, 98),
 				   extent=[geotransform[0], geotransform[0] + geotransform[1] * dataset.RasterXSize, geotransform[3] +
 						   geotransform[5] * dataset.RasterYSize, geotransform[3]])
 
@@ -334,7 +337,7 @@ def run(wd=None):
 		scale_geotiff(geotiff, result)
 
 	# display result
-	visualize_geotiff(result, "Logarithmisch skalierte Szene", "Rückstreuintensität [db]")
+	visualize_geotiff(result, "Logarithmisch skalierte Szene", "Rückstreuintensität [db]", color='viridis')
 
 	print("Programm wurde beendet.")
 
