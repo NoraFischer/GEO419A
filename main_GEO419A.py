@@ -292,6 +292,7 @@ def run(wd=None):
 
 	zip_filename = "GEO419A_Testdatensatz.zip"
 	url = "https://upload.uni-jena.de/data/649ad4879284a9.22886089/GEO419A_Testdatensatz.zip"
+	geotiff = "S1A_IW_20230214T031857_DVP_RTC10_G_gpunem_A42B_VH.tif"
 
 	# set user directory
 	set_user_dir(wd)
